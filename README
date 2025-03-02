@@ -1,0 +1,57 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                                 WCODECS                                      ║
+║                                                                              ║
+║           A high-performance WebCodecs API implementation for Rust           ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+╔═════════════════════════════╗
+║ OVERVIEW                    ║
+╚═════════════════════════════╝
+
+wcodecs is a (loose*) Rust implementation of the W3C WebCodecs API. It provides
+low-level access to media encoders and decoders with exceptional performance and
+safety guarantees outside of the browser, across macOS, Windows and Linux.
+
+NOTE:
+1. This library is mostly created for learning purposes + internal use for Helmer.
+2. It serves as an educational resource to understand WebCodecs implementation.
+3. The library is provided as-is, with no support except on a best-effort basis.
+
+* we might write some Swift/C underneath for prototyping.
+
+┌─────────────────────────────┐
+│ GOALS                       │
+└─────────────────────────────┘
+
+  • Near-complete implementation of the WebCodecs API specification
+  • Cross-platform compatibility (Windows, macOS, Linux)
+  • Async/await compatible API
+  • Hardware acceleration
+  • Minimal dependencies and small binary footprint
+
+┌─────────────────────────────┐
+│ NON GOALS                   │
+└─────────────────────────────┘
+
+  • All-encompassing media library like FFmpeg
+  • Support for old or deprecated platforms
+
+
+╔═════════════════════════════╗
+║ DOCUMENTATION               ║
+╚═════════════════════════════╝
+
+[coming soon]
+
+
+╔═════════════════════════════╗
+║ LICENSE                     ║
+╚═════════════════════════════╝
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+
+Copyright © 2025 Helmer Interactive Pte Ltd.
+All rights reserved.
