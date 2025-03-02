@@ -10,13 +10,13 @@
 ║ OVERVIEW                    ║
 ╚═════════════════════════════╝
 
-wcodecs is a (loose*) Rust implementation of the W3C WebCodecs API. It provides
+wcodecs is a (loose*) Rust implementation of the W3C WebCodecs API — bringing
 low-level access to media encoders and decoders with exceptional performance and
-safety guarantees outside of the browser, across macOS, Windows and Linux.
+safety guarantees outside of the browser to native macOS, Windows and Linux apps.
 
 NOTE:
-1. This library is mostly created for learning purposes + internal use for Helmer.
-2. It serves as an educational resource to understand WebCodecs implementation.
+1. This library is primarily created for learning purposes + internal use for Helmer.
+2. It serves as an educational resource to understand WebCodecs + multimedia programming.
 3. The library is provided as-is, with no support except on a best-effort basis.
 
 * we might write some Swift/C underneath for prototyping.
@@ -36,7 +36,7 @@ NOTE:
 └─────────────────────────────┘
 
   • All-encompassing media library like FFmpeg
-  • Support for old or deprecated platforms
+  • Support for old/deprecated platforms
 
 
 ╔═════════════════════════════╗
