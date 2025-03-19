@@ -6,13 +6,10 @@ use std::{
 
 use super::control::{self, ControlMessage, ControlMessageTrait, Outcome};
 
-/// Maximum number of worker threads.
 pub const MAX_WORKERS: usize = 4;
 
-/// A job is a boxed closure that can be executed.
 type Job = Box<dyn FnOnce() + Send + 'static>;
 
-/// A simple thread pool that executes jobs concurrently.
 pub struct ThreadPool {
     sender: mpsc::Sender<Job>,
     workers: Vec<Worker>,
@@ -21,11 +18,9 @@ pub struct ThreadPool {
 impl ThreadPool {
     pub fn new(num_threads: usize) -> Self {
         let (sender, receiver) = mpsc::channel::<Job>();
-        // Wrap the receiver so it can be shared safely.
         let receiver = Arc::new(Mutex::new(receiver));
         let mut workers = Vec::with_capacity(num_threads);
         for id in 0..num_threads {
-            println!("Creating worker {}", id);
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
         ThreadPool { sender, workers }
@@ -51,11 +46,9 @@ impl Worker {
             let job = receiver.lock().unwrap().recv();
             match job {
                 Ok(job) => {
-                    println!("Worker {} got a job; executing.", id);
                     job();
                 }
                 Err(_) => {
-                    println!("Worker {} disconnecting.", id);
                     break;
                 }
             }
@@ -67,7 +60,6 @@ impl Worker {
     }
 }
 
-/// The work queue that holds the thread pool.
 pub struct WorkQueue {
     thread_pool: ThreadPool,
 }
@@ -106,7 +98,7 @@ impl CodecInternalSlots {
         self.process_control_message_queue();
     }
 
-    /// Process the control message queue sequentially.
+    /// Sequential processing
     pub fn process_control_message_queue(&mut self) {
         while !self.message_queue_blocked && !self.control_message_queue.is_empty() {
             if let Some(front_msg) = self.control_message_queue.front_mut() {
