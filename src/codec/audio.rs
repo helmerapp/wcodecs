@@ -2,7 +2,10 @@ use std::sync::{Arc, Mutex};
 
 use crate::{
     core::{
-        control::{AudioDecodeMessage, AudioEncodeMessage, ControlMessage, DecodeMessage},
+        control::{
+            AudioDecodeMessage, AudioEncodeMessage, AudioFlushMessage, ControlMessage,
+            DecodeMessage, FlushMessage,
+        },
         internal_slots::CodecInternalSlots,
         work_queue::MAX_WORKERS,
     },
@@ -58,7 +61,7 @@ impl AudioDecoder {
         self.key_chunk_required = true;
 
         let config_message = AudioConfigMessage {
-            data: config,
+            config,
             work_queue: self.internal_slots.work_queue.clone(),
             error_callback: self.error_callback.clone(),
             codec_impl: self.codec_impl.clone(),
@@ -108,25 +111,18 @@ impl AudioDecoder {
         if self.state != State::Configured {
             return Err(Exception::InvalidStateError);
         }
-        {
-            let mut dec_lock = self.codec_impl.lock().unwrap();
-            if let Some(decoder) = dec_lock.as_mut() {
-                decoder.send_eof().map_err(|_| Exception::DecodeError)?;
-                //TODO:
-                //     let mut frame = ffmpeg_next::frame::Audio::empty();
-                //     while decoder.receive_frame(&mut frame).is_ok() {
-                //         let audio_data = AudioData::new(
-                //             "f32-planar".to_string(),
-                //             frame.rate() as f64,
-                //             frame.channels() as u32,
-                //             frame.samples() as u32,
-                //             frame.timestamp().unwrap_or(0) as f64,
-                //             frame.data(channel),
-                //         );
-                //         (self.output_callback)(audio_data);
-                //     }
-            }
-        }
+        let flush_message = AudioFlushMessage {
+            work_queue: self.internal_slots.work_queue.clone(),
+            error_callback: self.error_callback.clone(),
+            output_callback: self.output_callback.clone(),
+            codec_impl: self.codec_impl.clone(),
+        };
+        self.internal_slots
+            .enqueue_control_message(ControlMessage::Flush(FlushMessage::AudioFlush(
+                flush_message,
+            )));
+        self.internal_slots.process_control_message_queue();
+
         Ok(())
     }
 

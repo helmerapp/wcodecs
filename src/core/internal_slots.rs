@@ -3,7 +3,10 @@ use std::{collections::VecDeque, sync::Arc};
 use crate::codec::ConfigMessage;
 
 use super::{
-    control::{self, ControlMessage, ControlMessageTrait, DecodeMessage, EncodeMessage, Outcome},
+    control::{
+        self, ControlMessage, ControlMessageTrait, DecodeMessage, EncodeMessage, FlushMessage,
+        Outcome,
+    },
     work_queue::WorkQueue,
 };
 
@@ -33,6 +36,7 @@ impl CodecInternalSlots {
     pub fn process_control_message_queue(&mut self) {
         while !self.message_queue_blocked && !self.control_message_queue.is_empty() {
             if let Some(front_msg) = self.control_message_queue.front_mut() {
+                // TODO: refact this
                 match front_msg {
                     ControlMessage::Decode(decode_msg) => match decode_msg {
                         DecodeMessage::AudioDecode(dcd_msg) => {
@@ -59,6 +63,17 @@ impl CodecInternalSlots {
                     ControlMessage::Config(config_msg) => match config_msg {
                         ConfigMessage::AudioConfig(cfg_msg) => {
                             let outcome = cfg_msg.process();
+                            match outcome {
+                                Outcome::NotProcessed => break,
+                                Outcome::Processed => {
+                                    self.control_message_queue.pop_front();
+                                }
+                            }
+                        }
+                    },
+                    ControlMessage::Flush(flush_msg) => match flush_msg {
+                        FlushMessage::AudioFlush(fls_msg) => {
+                            let outcome = fls_msg.process();
                             match outcome {
                                 Outcome::NotProcessed => break,
                                 Outcome::Processed => {

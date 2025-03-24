@@ -13,7 +13,7 @@ pub enum ConfigMessage {
 
 #[derive(Clone)]
 pub struct AudioConfigMessage {
-    pub data: AudioDecoderConfig,
+    pub config: AudioDecoderConfig,
     pub work_queue: Arc<WorkQueue>,
     pub error_callback: Arc<dyn Fn(Exception) + Send + Sync>,
     pub codec_impl: Arc<Mutex<Option<ffmpeg_next::decoder::Audio>>>,
