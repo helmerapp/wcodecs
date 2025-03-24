@@ -1,10 +1,8 @@
+#![allow(unused)]
 use std::{
-    collections::VecDeque,
     sync::{mpsc, Arc, Mutex},
     thread,
 };
-
-use super::control::{self, ControlMessage, ControlMessageTrait, Outcome};
 
 pub const MAX_WORKERS: usize = 4;
 
@@ -73,75 +71,5 @@ impl WorkQueue {
 
     pub fn enqueue(&self, task: Job) {
         self.thread_pool.execute(task);
-    }
-}
-
-/// Internal slots shared by codec instances.
-pub struct CodecInternalSlots {
-    pub control_message_queue: VecDeque<control::ControlMessage>,
-    pub message_queue_blocked: bool,
-    pub work_queue: Arc<WorkQueue>,
-}
-
-impl CodecInternalSlots {
-    pub fn new(num_threads: usize) -> Self {
-        CodecInternalSlots {
-            control_message_queue: VecDeque::new(),
-            message_queue_blocked: false,
-            work_queue: Arc::new(WorkQueue::new(num_threads)),
-        }
-    }
-
-    /// Enqueue a control message and process the control message queue.
-    pub fn enqueue_control_message(&mut self, msg: control::ControlMessage) {
-        self.control_message_queue.push_back(msg);
-        self.process_control_message_queue();
-    }
-
-    /// Sequential processing
-    pub fn process_control_message_queue(&mut self) {
-        while !self.message_queue_blocked && !self.control_message_queue.is_empty() {
-            if let Some(front_msg) = self.control_message_queue.front_mut() {
-                match front_msg {
-                    ControlMessage::Decode(decode_msg) => {
-                        let outcome = decode_msg.process();
-                        match outcome {
-                            Outcome::NotProcessed => break,
-                            Outcome::Processed => {
-                                self.control_message_queue.pop_front();
-                            }
-                        }
-                    }
-                    ControlMessage::Encode(encode_msg) => {
-                        let outcome = encode_msg.process();
-                        match outcome {
-                            Outcome::NotProcessed => break,
-                            Outcome::Processed => {
-                                self.control_message_queue.pop_front();
-                            }
-                        }
-                    }
-                    ControlMessage::Config(config_msg) => {
-                        let outcome = config_msg.process();
-                        match outcome {
-                            Outcome::NotProcessed => break,
-                            Outcome::Processed => {
-                                self.control_message_queue.pop_front();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fn process_message<T: ControlMessageTrait>(&mut self, mut msg: T) -> bool {
-        match msg.process() {
-            Outcome::NotProcessed => false,
-            Outcome::Processed => {
-                self.control_message_queue.pop_front();
-                true
-            }
-        }
     }
 }

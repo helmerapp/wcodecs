@@ -1,5 +1,6 @@
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum State {
-    Closed,
+    Unconfigured,
     Configured,
+    Closed,
 }
