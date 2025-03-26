@@ -51,8 +51,13 @@ fn main() {
             continue;
         }
 
-        let data = packet.data().unwrap().to_vec();
-
+        let data = match packet.data() {
+            Some(d) => d.to_vec(),
+            None => {
+                eprintln!("No data found in packet.");
+                continue;
+            }
+        };
         let timestamp = packet.pts().unwrap_or(0);
 
         let encoded_chunk = EncodedAudioChunk {
